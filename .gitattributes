@@ -1,2 +1,95 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+const int MAX_COINS = 10;
+
+vector<vector<int>> createMatrix(int n) {
+    vector<vector<int>> matrix(n, vector<int>(n));
+    srand(time(nullptr));
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            matrix[i][j] = rand() % MAX_COINS + 1;
+        }
+    }
+
+    return matrix;
+}
+
+void visualizeMatrix(const vector<vector<int>>& matrix) {
+    for (const auto& row : matrix) {
+        for (int value : row) {
+            cout << "[" << value << "]";
+        }
+        cout << endl;
+    }
+}
+
+vector<pair<int, int>> findMaxCoinsPath(const vector<vector<int>>& matrix, vector<vector<char>>& pathMatrix) {
+    int n = matrix.size();
+    vector<pair<int, int>> path;
+    int x = 0, y = 0;
+
+    while (x < n && y < n) {
+        path.emplace_back(x, y);
+        pathMatrix[x][y] = '*';  
+
+        if (x == n - 1 && y == n - 1) {
+            break;
+        }
+
+        if (x == n - 1) {
+            ++y;
+        }
+        else if (y == n - 1) {
+            ++x;
+        }
+        else {
+            if (matrix[x + 1][y] > matrix[x][y + 1]) {
+                ++x;
+            }
+            else {           
+                ++y;
+            }
+        }
+    }
+
+    return path;
+}
+
+int main() {
+
+    setlocale(LC_CTYPE, "ukr");
+
+    int n = 5;   //Тут можна змінити розміри замку!!!
+    vector<vector<int>> matrix = createMatrix(n);
+    vector<vector<char>> pathMatrix(n, vector<char>(n, ' '));  
+
+    cout << "Початкова матриця:" << endl;
+    visualizeMatrix(matrix);
+
+    pair<int, int> start = { 0, 0 };
+    cout << "\nСтарт на [" << start.first + 1 << "][" << start.second + 1 << "]" << endl;
+
+    vector<pair<int, int>> path = findMaxCoinsPath(matrix, pathMatrix);
+
+    cout << "\nМаршрут:" << endl;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            cout << "[" << pathMatrix[i][j] << "]";
+        }
+        cout << endl;
+    }
+
+    int totalCoins = 0;
+    for (const auto& pos : path) {
+        totalCoins += matrix[pos.first][pos.second];
+    }
+
+    cout << "\nЗагальна кількість монет яку зібрав Буратино: " << totalCoins << endl;
+
+    return 0;
+}
+
